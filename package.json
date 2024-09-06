@@ -3,8 +3,11 @@
   "version": "0.0.1",
   "description": "Small, expressive, injection-safe and typescript friendly template engine for pg SQL",
   "author": "Roman Ditchuk <roman@ototak.net>",
-  "homepage": "",
+  "homepage": "https://github.com/smbwain/sqlmint",
   "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/smbwain/sqlmint/issues"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -29,7 +32,7 @@
   "devDependencies": {
     "@types/node": "^20.14.2",
     "@types/pg": "^8.11.8",
-    "@types/pg-format": "^1.0.1",
+    "@types/pg-format": "^1.0.4",
     "typescript": "^5.3.3"
   }
 }
