@@ -160,7 +160,7 @@ Serialization of each value is processed in the following order:
 
 Combines few sql conditions using `AND` operator. It ignores `null` and `undefined` values, which allows to add optional conditions easily.
 
-```
+```ts
 const loadUsersQuery = (filter: {
     isActive?: boolean,
     roles: Array<'admin' | 'seller' | 'buyer'>,
@@ -185,7 +185,7 @@ loadUsersQuery({
 
 By default, if all conditions contain nulls, error will be thrown. If you want to override this behaviour, use second parameter. It describes a fallback condition for the case no other conditions were passed.
 
-```
+```ts
 const loadUsersQuery = (filter: {
     isActive?: boolean,
     roles: Array<'admin' | 'seller' | 'buyer'>,
@@ -217,7 +217,7 @@ It ignores undefined values, so it's very convinient to do different partial upd
 
 It throws error, if there is no any value to set.
 
-```
+```ts
 const updateUserQuery = (id: number, data: {
     name?: string;
     age?: number;
@@ -242,7 +242,7 @@ updateUserQuery(1, {age: 19})
 
 It helps to build insert queries
 
-```
+```ts
 sql`INSERT INTO users ${sql.insert({
     name: 'Roman',
     age: 35,
@@ -254,7 +254,7 @@ sql`INSERT INTO users ${sql.insert({
 
 It helps to build multi insert queries
 
-```
+```ts
 sql`INSERT INTO users ${sql.multiInsert([{
     name: 'Roman',
     age: 35,
@@ -269,11 +269,9 @@ sql`INSERT INTO users ${sql.multiInsert([{
 
 Serializes array of items using `ARRAY[...]` notation. Recursively serializes each element.
 
-```
+```ts
 sql`SELECT ${sql.array(['1', '2', '3'])}` // -> SELECT ARRAY['1', '2', '3']
-```
 
-```
 sql`SELECT ${sql.array([])}::int[]` // -> SELECT ARRAY[]::int[]
 ```
 
@@ -281,16 +279,17 @@ sql`SELECT ${sql.array([])}::int[]` // -> SELECT ARRAY[]::int[]
 
 Serializes array of items using `(...)` notation. Recursively serializes each element.
 
-```
+```ts
 const arr = [1, 2, 3];
 sql`SELECT * FROM users WHERE id IN ${sql.list(arr)}` // -> SELECT * FROM users WHERE id IN (1, 2, 3)
 ```
 
-> Actually default behaviour of serializer is to treat array as a list. So usually you can just pass an array without _list_ helper:
-> ```
-> const arr = [1, 2, 3];
-> sql`SELECT * FROM users WHERE id IN ${arr}` // -> SELECT * FROM users WHERE id IN (1, 2, 3)
-> ```
+__Actually default behaviour of serializer is to treat array as a list.__ So usually you can just pass an array without _list_ helper:
+ 
+```ts
+const arr = [1, 2, 3];
+sql`SELECT * FROM users WHERE id IN ${arr}` // -> SELECT * FROM users WHERE id IN (1, 2, 3)
+```
 
 ## ident
 
@@ -298,7 +297,7 @@ Usually you just put postgres identificators (like names of tables or columns) i
 
 But if you want to put name from variable or expression, you may want to use `sql.ident` helper to serialize identifier name.
 
-```
+```ts
 const table = 'user';
 
 sql`SELECT * FROM ${sql.ident(table)}`
