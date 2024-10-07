@@ -1,4 +1,4 @@
-import {Client, Pool, QueryResult, QueryResultRow} from 'pg';
+import {Client, Pool, PoolClient, QueryResult, QueryResultRow} from 'pg';
 import {WithRawSql} from './sql';
 
 export type QueryFunction = <T extends QueryResultRow = never>(query: WithRawSql<T>) => Promise<QueryResult<T>>;
@@ -9,12 +9,20 @@ export interface PgWrapper {
     transaction: TransactionFunction;
 }
 
+const createQueryFunction = (cp: Client | Pool | PoolClient): QueryFunction => async <T extends QueryResultRow = never>(q: WithRawSql<T>) => {
+    const res = await cp.query<T>(q.rawSql);
+    return q._packF ? {
+        ...res,
+        rows: res.rows.map(q._packF),
+    } : res;
+};
+
 export function wrapClient(client: Client): PgWrapper {
-    const query = <T extends QueryResultRow>(query: WithRawSql<T>) => client.query<T>(query.rawSql);
+    const query = createQueryFunction(client);
     const transaction = async <R>(handler: (query: QueryFunction) => Promise<R>): Promise<R> => {
         try {
             await client.query('BEGIN');
-            const res = await handler(<T extends QueryResultRow>(query: WithRawSql<T>) => client.query<T>(query.rawSql));
+            const res = await handler(createQueryFunction(client));
             await client.query('COMMIT');
             return res;
         } catch (err) {
@@ -29,12 +37,12 @@ export function wrapClient(client: Client): PgWrapper {
 }
 
 export function wrapPool(pool: Pool): PgWrapper {
-    const query = <T extends QueryResultRow>(query: WithRawSql<T>) => pool.query<T>(query.rawSql);
+    const query = createQueryFunction(pool);
     const transaction = async <R>(handler: (query: QueryFunction) => Promise<R>): Promise<R> => {
         const client = await pool.connect();
         try {
             await client.query('BEGIN');
-            const res = await handler(<T extends QueryResultRow>(query: WithRawSql<T>) => client.query<T>(query.rawSql));
+            const res = await handler(createQueryFunction(client));
             await client.query('COMMIT');
             return res;
         } catch (err) {

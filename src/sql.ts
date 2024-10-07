@@ -4,7 +4,15 @@ export class WithRawSql<T = never> {
     constructor(
         public rawSql: string,
     ) {}
+    public _packF: PackFunction<any, T>;
+    public pack<R>(pf: PackFunction<T, R>): WithRawSql<R> {
+        const res = new WithRawSql<R>(this.rawSql);
+        res._packF = pf;
+        return res;
+    }
 }
+
+export type PackFunction<T, R> = (v: T) => R;
 
 export const config: {
     customSerialize?: (val: any) => string | null;
