@@ -1,4 +1,4 @@
-import * as pgFormat from 'pg-format';
+import {quoteIdent, quoteLiteral} from './format';
 
 export class WithRawSql<T = never> {
     constructor(
@@ -29,7 +29,7 @@ export const serialize = (val: any): string => {
     if (Array.isArray(val)) {
         return `(${val.map(item => serialize(item)).join(',')})`;
     } else {
-        return pgFormat.literal(val);
+        return quoteLiteral(val);
     }
 };
 
@@ -54,7 +54,7 @@ sql.insert = (data: Record<string, any>): WithRawSql => {
         throw new Error('No keys to insert');
     }
     return sql.raw(
-        `(${keys.map(key => pgFormat.ident(key)).join(',')}) VALUES (${keys.map(key => serialize(data[key])).join(',')})`,
+        `(${keys.map(key => quoteIdent(key)).join(',')}) VALUES (${keys.map(key => serialize(data[key])).join(',')})`,
     );
 }
 
@@ -64,7 +64,7 @@ sql.multiInsert = (list: Array<Record<string, any>>): WithRawSql => {
     }
     const keys = Object.keys(list[0]).filter(key => list[0][key] !== undefined);
     return sql.raw(
-        `(${keys.map(key => pgFormat.ident(key)).join(',')}) VALUES ${list.map(data => `(${keys.map(key => serialize(data[key])).join(',')})`)}`,
+        `(${keys.map(key => quoteIdent(key)).join(',')}) VALUES ${list.map(data => `(${keys.map(key => serialize(data[key])).join(',')})`)}`,
     );
 };
 
@@ -78,7 +78,7 @@ sql.set = (data: Record<string, any>): WithRawSql => {
         throw new Error('No keys to update');
     }
     return sql.raw(
-        keys.map(key => `${pgFormat.ident(key)}=${serialize(data[key])}`).join(','),
+        keys.map(key => `${quoteIdent(key)}=${serialize(data[key])}`).join(','),
     );
 };
 
@@ -100,7 +100,7 @@ sql.where = (
 sql.and = (conditions: Array<WithRawSql | null | undefined>, defaultCondition?: WithRawSql): WithRawSql => sql.where(conditions, 'AND', defaultCondition);
 sql.or = (conditions: Array<WithRawSql | null | undefined>, defaultCondition?: WithRawSql): WithRawSql => sql.where(conditions, 'OR', defaultCondition);
 
-sql.ident = (s: string): WithRawSql => sql.raw(pgFormat.ident(s));
+sql.ident = (s: string): WithRawSql => sql.raw(quoteIdent(s));
 
 sql.join = (arr: WithRawSql[]): WithRawSql => sql.raw(arr.map(el => el.rawSql).join(', '));
 sql.concat = (arr: WithRawSql[]): WithRawSql => sql.raw(arr.map(el => el.rawSql).join(' '));

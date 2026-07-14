@@ -26,13 +26,9 @@
   "peerDependencies": {
     "pg": "8.x"
   },
-  "dependencies": {
-    "pg-format": "^1.0.4"
-  },
   "devDependencies": {
     "@types/node": "^20.14.2",
     "@types/pg": "^8.11.8",
-    "@types/pg-format": "^1.0.4",
     "typescript": "^5.3.3"
   }
 }
